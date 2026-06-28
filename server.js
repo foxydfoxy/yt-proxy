@@ -1,29 +1,25 @@
 const express = require('express');
-const ytdl = require('ytdl-core');
 const cors = require('cors');
+const { exec, execSync } = require('child_process');
 const app = express();
 
 app.use(cors());
 
-app.get('/video', async (req, res) => {
+try {
+    execSync('yt-dlp --version');
+    console.log('yt-dlp ok');
+} catch(e) {
+    try { execSync('pip install yt-dlp'); } catch(e2) {}
+}
+
+app.get('/video', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('URL manquante');
-    
-    try {
-        const info = await ytdl.getInfo(url);
-        const format = ytdl.chooseFormat(info.formats, { 
-            quality: 'highest',
-            filter: 'videoandaudio'
-        });
-        
-        res.redirect(format.url);
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Erreur: ' + err.message);
-    }
+    exec('yt-dlp -f "best[ext=mp4]/best" --get-url "' + url + '"', (err, stdout, stderr) => {
+        if (err) return res.status(500).send('Erreur: ' + stderr);
+        res.redirect(stdout.trim());
+    });
 });
 
 app.get('/health', (req, res) => res.send('OK'));
-
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => console.log('Proxy démarré sur port ' + PORT));
+app.listen(process.env.PORT || 3000, () => console.log('Proxy démarré'));
