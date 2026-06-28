@@ -9,12 +9,11 @@ app.get('/video', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('URL manquante');
     
-    exec(`yt-dlp -f "best[ext=mp4][height<=480]/best[ext=mp4]/best" --get-url "${url}"`, 
+    exec(`yt-dlp --cookies cookies.txt -f "best[ext=mp4][height<=720]/best[ext=mp4]/best" --get-url "${url}"`,
     { timeout: 30000 },
     (err, stdout, stderr) => {
         if (err) return res.status(500).json({ error: stderr });
         const videoUrl = stdout.trim().split('\n')[0];
-        // Retourner l'URL en JSON plutôt que streamer
         res.json({ url: videoUrl });
     });
 });
