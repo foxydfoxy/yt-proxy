@@ -7,7 +7,7 @@ app.use(cors());
 app.get('/video', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('URL manquante');
-    exec(`/root/.deno/bin/deno --version && yt-dlp --js-runtimes deno:/root/.deno/bin/deno -f "best[ext=mp4][height<=720]/best[ext=mp4]/best" --get-url "${url}"`,
+    exec(`yt-dlp --js-runtimes deno -f "best[ext=mp4][height<=720]/best[ext=mp4]/best" --get-url "${url}"`,
     { timeout: 60000 },
     (err, stdout, stderr) => {
         if (err) return res.status(500).json({ error: stderr });
