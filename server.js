@@ -1,7 +1,6 @@
 const express = require('express');
 const cors = require('cors');
 const { exec } = require('child_process');
-const path = require('path');
 const app = express();
 app.use(cors());
 
@@ -9,9 +8,7 @@ app.get('/video', (req, res) => {
     const url = req.query.url;
     if (!url) return res.status(400).send('URL manquante');
     
-    const nodePath = process.execPath;
-    
-    exec(`yt-dlp --js-runtimes node:${nodePath} -f "best[ext=mp4][height<=720]/best[ext=mp4]/best" --get-url "${url}"`,
+    exec(`yt-dlp --cookies /etc/secrets/cookies.txt --js-runtimes node:${process.execPath} -f "best[ext=mp4][height<=720]/best[ext=mp4]/best" --get-url "${url}"`,
     { timeout: 60000 },
     (err, stdout, stderr) => {
         if (err) return res.status(500).json({ error: stderr });
@@ -27,4 +24,4 @@ setInterval(() => {
     require('https').get('https://yt-proxy-w57x.onrender.com/health', () => {}).on('error', () => {});
 }, 10 * 60 * 1000);
 
-app.listen(process.env.PORT || 3000, () => console.log('Proxy démarré sur port ' + (process.env.PORT || 3000)));
+app.listen(process.env.PORT || 3000, () => console.log('Proxy démarré'));
